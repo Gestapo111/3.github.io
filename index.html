@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evaluación: PRINCIPIOS DE ELECTRICIDAD</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h1 {
+            color: #333;
+        }
+        .quiz-container {
+            background-color: #fff;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 80%;
+            max-width: 800px;
+        }
+        .question {
+            margin-bottom: 15px;
+        }
+        .options {
+            list-style-type: none;
+            padding: 0;
+        }
+        .options li {
+            margin-bottom: 10px;
+        }
+        button {
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        #results {
+            margin-top: 20px;
+            font-size: 18px;
+        }
+        footer {
+            background-color: #333;
+            color: #fff;
+            padding: 10px;
+            width: 100%;
+            text-align: center;
+            position: fixed;
+            bottom: 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Evaluación: PRINCIPIOS DE ELECTRICIDAD</h1>
+    <div class="quiz-container">
+        <div id="quiz"></div>
+        <button id="submit">Enviar respuestas</button>
+        <div id="results"></div>
+    </div>
+    <footer>
+        &copy; derechos reservados Prof. Alberto Sanchez
+    </footer>
+    <script>
+        const quizData = [
+            {
+                question: "¿Qué es la corriente eléctrica?",
+                answers: [
+                    { text: "El flujo de electrones a través de un conductor.", correct: true },
+                    { text: "La acumulación de cargas en un punto.", correct: false },
+                    { text: "La fuerza entre dos cargas.", correct: false },
+                    { text: "La resistencia en un circuito.", correct: false }
+                ]
+            },
+            {
+                question: "¿Qué unidad se utiliza para medir la resistencia eléctrica?",
+                answers: [
+                    { text: "Voltios.", correct: false },
+                    { text: "Amperios.", correct: false },
+                    { text: "Ohmios.", correct: true },
+                    { text: "Vatios.", correct: false }
+                ]
+            },
+            {
+                question: "¿Cuál es la ley que relaciona voltaje, corriente y resistencia?",
+                answers: [
+                    { text: "Ley de Coulomb.", correct: false },
+                    { text: "Ley de Faraday.", correct: false },
+                    { text: "Ley de Ohm.", correct: true },
+                    { text: "Ley de Ampere.", correct: false }
+                ]
+            },
+            {
+                question: "¿Qué es un circuito eléctrico?",
+                answers: [
+                    { text: "Una ruta cerrada por la cual fluye la corriente eléctrica.", correct: true },
+                    { text: "Una acumulación de cargas eléctricas.", correct: false },
+                    { text: "Una fuente de energía.", correct: false },
+                    { text: "Un dispositivo que mide la corriente.", correct: false }
+                ]
+            },
+            {
+                question: "¿Qué es el voltaje?",
+                answers: [
+                    { text: "La diferencia de potencial eléctrico entre dos puntos.", correct: true },
+                    { text: "La corriente que fluye en un circuito.", correct: false },
+                    { text: "La resistencia en un circuito.", correct: false },
+                    { text: "La potencia eléctrica.", correct: false }
+                ]
+            },
+            {
+                question: "¿Qué es la potencia eléctrica?",
+                answers: [
+                    { text: "La tasa a la cual se realiza trabajo eléctrico.", correct: true },
+                    { text: "La cantidad de carga eléctrica.", correct: false },
+                    { text: "La diferencia de potencial eléctrico.", correct: false },
+                    { text: "La resistencia eléctrica.", correct: false }
+                ]
+            },
+            {
+                question: "¿Qué es un circuito en serie?",
+                answers: [
+                    { text: "Un circuito en el que la corriente sigue un solo camino.", correct: true },
+                    { text: "Un circuito en el que la corriente sigue múltiples caminos.", correct: false },
+                    { text: "Un circuito en el que la corriente no fluye.", correct: false },
+                    { text: "Un circuito sin resistencia.", correct: false }
+                ]
+            },
+            {
+                question: "¿Qué es un circuito en paralelo?",
+                answers: [
+                    { text: "Un circuito en el que la corriente sigue múltiples caminos.", correct: true },
+                    { text: "Un circuito en el que la corriente sigue un solo camino.", correct: false },
+                    { text: "Un circuito en el que la corriente no fluye.", correct: false },
+                    { text: "Un circuito sin resistencia.", correct: false }
+                ]
+            },
+            {
+                question: "¿Qué es la ley de Coulomb?",
+                answers: [
+                    { text: "La fuerza entre dos cargas es directamente proporcional al producto de las cargas e inversamente proporcional al cuadrado de la distancia entre ellas.", correct: true },
+                    { text: "La corriente en un conductor es directamente proporcional al voltaje aplicado e inversamente proporcional a la resistencia.", correct: false },
+                    { text: "La corriente inducida en un circuito es proporcional al cambio en el flujo magnético.", correct: false },
+                    { text: "La fuerza magnética sobre una carga en movimiento es proporcional a la carga y la velocidad.", correct: false }
+                ]
+            },
+            {
+                question: "¿Qué es la capacitancia?",
+                answers: [
+                    { text: "La capacidad de un sistema para almacenar carga eléctrica.", correct: true },
+                    { text: "La resistencia de un material al flujo de corriente.", correct: false },
+                    { text: "La cantidad de energía eléctrica que un dispositivo puede transformar.", correct: false },
+                    { text: "La diferencia de potencial entre dos puntos.", correct: false }
+                ]
+            },
+            {
+                question: "¿Qué es un condensador?",
+                answers: [
+                    { text: "Un dispositivo que almacena energía eléctrica en un campo eléctrico.", correct: true },
+                    { text: "Un dispositivo que mide la corriente eléctrica.", correct: false },
+                    { text: "Un dispositivo que convierte la energía eléctrica en luz.", correct: false },
+                    { text: "Un dispositivo que controla el flujo de corriente.", correct: false }
+                ]
+            },
+            {
+                question: "¿Qué es la inducción electromagnética?",
+                answers: [
+                    { text: "La generación de una corriente eléctrica en un conductor por un campo magnético variable.", correct: true },
+                    { text: "La generación de un campo magnético por una corriente eléctrica.", correct: false },
+                    { text: "La generación de una carga eléctrica por un campo eléctrico.", correct: false },
+                    { text: "La generación de una corriente eléctrica por una resistencia variable.", correct: false }
+                ]
+            },
+            {
+                question: "¿Qué es la impedancia?",
+                answers: [
+                    { text: "La oposición total al flujo de corriente en un circuito de corriente alterna.", correct: true },
+                    { text: "La resistencia al flujo de corriente en un circuito de corriente continua.", correct: false },
+                    { text: "La capacitancia en un circuito de corriente alterna.", correct: false },
+                    { text: "La inductancia en un circuito de corriente continua.", correct: false }
+                ]
+            },
+            {
+                question: "¿Qué es un transformador?",
+                answers: [
+                    { text: "Un dispositivo que cambia el voltaje de una corriente alterna.", correct: true },
+                    { text: "Un dispositivo que convierte la corriente alterna en corriente continua.", correct: false },
+                    { text: "Un dispositivo que mide la potencia eléctrica.", correct: false },
+                    { text: "Un dispositivo que almacena energía eléctrica.", correct: false }
+                ]
+            },
+            {
+                question: "¿Qué es un diodo?",
+                answers: [
+                    { text: "Un componente electrónico que permite el flujo de corriente en una sola dirección.", correct: true },
+                    { text: "Un componente electrónico que amplifica la señal eléctrica.", correct: false },
+                    { text: "Un componente electrónico que almacena carga eléctrica.", correct: false },
+                    { text: "Un componente electrónico que convierte la energía eléctrica en luz.", correct: false }
+                ]
+            },
+            {
+                question: "¿Qué es un transistor?",
+                answers: [
+                    { text: "Un componente electrónico que amplifica o conmuta señales eléctricas.", correct: true },
+                    { text: "Un componente electrónico que almacena carga eléctrica.", correct: false },
+                    { text: "Un componente electrónico que permite el flujo de corriente en una sola dirección.", correct: false },
+                    { text: "Un componente electrónico que mide la corriente eléctrica.", correct: false }
+                ]
+            },
+            {
+                question: "¿Qué es la resistencia equivalente en un circuito en serie?",
+                answers: [
+                    { text: "La suma de todas las resistencias en el circuito.", correct: true },
+                    { text: "La inversa de la suma de las inversas de las resistencias en el circuito.", correct: false },
+                    { text: "La diferencia de potencial entre dos puntos en el circuito.", correct: false },
+                    { text: "La cantidad de carga eléctrica en el circuito.", correct: false }
+                ]
+            },
+            {
+                question: "¿Qué es la resistencia equivalente en un circuito en paralelo?",
+                answers: [
+                    { text: "La inversa de la suma de las inversas de las resistencias en el circuito.", correct: true },
+                    { text: "La suma de todas las resistencias en el circuito.", correct: false },
+                    { text: "La diferencia de potencial entre dos puntos en el circuito.", correct: false },
+                    { text: "La cantidad de carga eléctrica en el circuito.", correct: false }
+                ]
+            },
+            {
+                question: "¿Qué es la reactancia?",
+                answers: [
+                    { text: "La oposición al flujo de corriente alterna debido a la inductancia o capacitancia.", correct: true },
+                    { text: "La resistencia al flujo de corriente continua.", correct: false },
+                    { text: "La cantidad de energía eléctrica almacenada en un campo eléctrico.", correct: false },
+                    { text: "La diferencia de potencial entre dos puntos.", correct: false }
+                ]
+            },
+            {
+                question: "¿Qué es la ley de Kirchhoff de las corrientes?",
+                answers: [
+                    { text: "La suma de las corrientes que entran a un nodo es igual a la suma de las corrientes que salen del nodo.", correct: true },
+                    { text: "La suma de las diferencias de potencial alrededor de cualquier circuito cerrado es igual a cero.", correct: false },
+                    { text: "La corriente en un conductor es directamente proporcional al voltaje aplicado e inversamente proporcional a la resistencia.", correct: false },
+                    { text: "La fuerza entre dos cargas es directamente proporcional al producto de las cargas e inversamente proporcional al cuadrado de la distancia entre ellas.", correct: false }
+                ]
+            },
+            {
+                question: "¿Qué es la ley de Kirchhoff de las tensiones?",
+                answers: [
+                    { text: "La suma de las diferencias de potencial alrededor de cualquier circuito cerrado es igual a cero.", correct: true },
+                    { text: "La suma de las corrientes que entran a un nodo es igual a la suma de las corrientes que salen del nodo.", correct: false },
+                    { text: "La corriente en un conductor es directamente proporcional al voltaje aplicado e inversamente proporcional a la resistencia.", correct: false },
+                    { text: "La fuerza entre dos cargas es directamente proporcional al producto de las cargas e inversamente proporcional al cuadrado de la distancia entre ellas.", correct: false }
+                ]
+            },
+            {
+                question: "¿Qué es un amperímetro?",
+                answers: [
+                    { text: "Un dispositivo que mide la corriente eléctrica.", correct: true },
+                    { text: "Un dispositivo que mide el voltaje.", correct: false },
+                    { text: "Un dispositivo que mide la resistencia.", correct: false },
+                    { text: "Un dispositivo que almacena carga eléctrica.", correct: false }
+                ]
+            },
+            {
+                question: "¿Qué es un voltímetro?",
+                answers: [
+                    { text: "Un dispositivo que mide el voltaje.", correct: true },
+                    { text: "Un dispositivo que mide la corriente eléctrica.", correct: false },
+                    { text: "Un dispositivo que mide la resistencia.", correct: false },
+                    { text: "Un dispositivo que almacena carga eléctrica.", correct: false }
+                ]
+            },
+            {
+                question: "¿Qué es la resistencia específica?",
+                answers: [
+                    { text: "La resistencia de un material por unidad de longitud y área de sección transversal.", correct: true },
+                    { text: "La resistencia total en un circuito.", correct: false },
+                    { text: "La resistencia de un material a altas temperaturas.", correct: false },
+                    { text: "La resistencia de un material a bajas temperaturas.", correct: false }
+                ]
+            },
+            {
+                question: "¿Qué es la resistencia térmica?",
+                answers: [
+                    { text: "La oposición de un material al flujo de calor.", correct: true },
+                    { text: "La oposición de un material al flujo de electricidad.", correct: false },
+                    { text: "La cantidad de energía térmica almacenada en un material.", correct: false },
+                    { text: "La diferencia de temperatura entre dos puntos.", correct: false }
+                ]
+            }
+        ];
+
+        let attempt = 0;
+        const maxAttempts = 3;
+
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function loadQuiz() {
+            const quizContainer = document.getElementById('quiz');
+            quizContainer.innerHTML = '';
+            quizData.forEach((data, index) => {
+                const questionContainer = document.createElement('div');
+                questionContainer.className = 'question';
+
+                const questionTitle = document.createElement('h3');
+                questionTitle.innerText = `${index + 1}. ${data.question}`;
+                questionContainer.appendChild(questionTitle);
+
+                const optionsList = document.createElement('ul');
+                optionsList.className = 'options';
+
+                shuffle(data.answers).forEach(answer => {
+                    const option = document.createElement('li');
+                    const optionLabel = document.createElement('label');
+                    const optionInput = document.createElement('input');
+                    optionInput.type = 'radio';
+                    optionInput.name = `question${index}`;
+                    optionInput.value = answer.correct;
+                    optionLabel.appendChild(optionInput);
+                    optionLabel.appendChild(document.createTextNode(answer.text));
+                    option.appendChild(optionLabel);
+                    optionsList.appendChild(option);
+                });
+
+                questionContainer.appendChild(optionsList);
+                quizContainer.appendChild(questionContainer);
+            });
+        }
+
+        function submitQuiz() {
+            if (attempt >= maxAttempts) {
+                alert('Has alcanzado el número máximo de intentos.');
+                return;
+            }
+
+            const resultsContainer = document.getElementById('results');
+            const answers = document.querySelectorAll('input[type="radio"]:checked');
+            let score = 0;
+
+            quizData.forEach((data, index) => {
+                const selected = answers[index] ? answers[index].value === 'true' : null;
+                if (selected === true) {
+                    score += 0.4; // Each correct answer is worth 0.4 points
+                }
+            });
+
+            score = Math.round(score * 10) / 10; // Round to one decimal place
+            let feedback = quizData.map((data, index) => {
+                const selected = answers[index] ? answers[index].value === 'true' : null;
+                let result;
+                if (selected === null) {
+                    result = "No contestada";
+                } else if (selected === true) {
+                    result = "Correcta";
+                } else {
+                    result = "Incorrecta";
+                }
+                return `<p>${index + 1}. ${result}</p>`;
+            }).join("");
+
+            resultsContainer.innerHTML = `<h3>Resultados:</h3><p>Puntaje: ${score} / 10</p>${feedback}`;
+
+            attempt++;
+            if (attempt >= maxAttempts) {
+                alert('Has alcanzado el número máximo de intentos.');
+            }
+        }
+
+        document.getElementById('submit').addEventListener('click', submitQuiz);
+
+        loadQuiz();
+    </script>
+</body>
+</html>
