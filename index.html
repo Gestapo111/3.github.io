@@ -7,847 +7,784 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            padding: 20px;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            user-select: none;
         }
+        h1 {
+            color: #333;
+        }
+        .quiz-container {
+            background-color: #fff;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 80%;
+            max-width: 800px;
+            display: none;
+        }
+        .question {
+            margin-bottom: 15px;
+        }
+        .options {
+            list-style-type: none;
+            padding: 0;
+        }
+        .options li {
+            margin-bottom: 10px;
+        }
+        button {
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        #results {
+            margin-top: 20px;
+            font-size: 18px;
+        }
+        footer {
+            background-color: #333;
+            color: #fff;
+            padding: 10px;
+            width: 100%;
+            text-align: center;
+            position: fixed;
+            bottom: 0;
+        }
+        .input-field {
+            margin-bottom: 10px;
+        }
+        .input-field label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .input-field input {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4);
+            padding-top: 60px;
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 600px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        /* Cronómetro flotante */
         #timer {
             position: fixed;
             top: 10px;
             right: 10px;
-            background-color: #f2f2f2;
-            border: 1px solid #ccc;
             padding: 10px;
+            background-color: green;
+            color: white;
             font-size: 18px;
             border-radius: 5px;
         }
-        .hidden {
-            display: none;
+        /* Estilo para los números de preguntas incorrectas */
+        .incorrect-answers {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
         }
-        .question {
-            margin-bottom: 20px;
-        }
-        .question h3 {
-            margin-bottom: 10px;
-        }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-        }
-        #resultsModal {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: white;
-            padding: 20px;
-            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-        }
-        #overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 500;
+        .incorrect-answers div {
+            width: 18%;
+            text-align: center;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            padding: 5px;
+            border-radius: 5px;
         }
     </style>
 </head>
 <body>
-    <div id="timer" class="hidden">Tiempo restante: <span id="time">30:00</span></div>
+    <h1>Evaluación Unidad 3: Principios de Electricidad</h1>
+    <div class="quiz-container">
+        <div id="quiz"></div>
+        <button id="submit">Enviar respuestas</button>
+    </div>
+    <footer>
+        &copy; Derechos Reservados Prof. Alberto Sanchez
+    </footer>
 
-    <div class="container">
-        <div id="studentInfoForm">
-            <h2>Información del Estudiante</h2>
-            <form id="infoForm">
-                <label for="name">Nombre del Estudiante:</label>
-                <input type="text" id="name" required><br><br>
+    <!-- Modal para solicitar nombre y NIE -->
+    <div id="infoModal" class="modal">
+        <div class="modal-content">
+            <h2>Por favor, ingresa tus datos</h2>
+            <div class="input-field">
+                <label for="fullname">Nombre completo:</label>
+                <input type="text" id="fullname" required>
+            </div>
+            <div class="input-field">
                 <label for="nie">NIE:</label>
-                <input type="text" id="nie" required><br><br>
-                <label for="unit">Unidad Evaluada:</label>
-                <input type="text" id="unit" value="Unidad 3: Principios de Electricidad" readonly><br><br>
-                <button type="submit">Iniciar Evaluación</button>
-            </form>
+                <input type="text" id="nie" required>
+            </div>
+            <button id="startQuiz">Comenzar Evaluación</button>
         </div>
-
-        <div id="quiz" class="hidden">
-            <h2>Evaluación Unidad 3: Principios de Electricidad</h2>
-
-            <div id="questions-container"></div>
-
-            <button id="submitQuiz">OBTENER CALIFICACIÓN</button>
-        </div>
-
-        <div id="resultsModal">
-            <h2>Resultados</h2>
-            <p id="date"></p>
-            <p id="timeTaken"></p>
-            <p id="unitEvaluated"></p>
-            <p id="studentName"></p>
-            <p id="studentNIE"></p>
-            <p id="score"></p>
-            <p id="incorrectAnswers"></p>
-            <button id="closeModal">Cerrar</button>
-        </div>
-
-        <div id="overlay"></div>
     </div>
 
-    <script>
-        const nieList = ["4267837", "3850952", "3851018", "5032035", "19806181", "6297536", "2608724", "6262810", "4267838", "20162435", "3850923", "19806209", "4267828", "3850942"];
-        const maxTime = 30 * 60; // 30 minutos en segundos
-        let timeRemaining = maxTime;
-        const timerElement = document.getElementById('time');
-        let startTime;
+    <!-- Modal de resultados -->
+    <div id="resultModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Resultados de la Evaluación</h2>
+            <p id="modalName"></p>
+            <p id="modalNIE"></p>
+            <h3>Preguntas incorrectas:</h3>
+            <div id="modalIncorrectAnswers" class="incorrect-answers"></div>
+            <h3>Detalles:</h3>
+            <p id="modalDetails"></p>
+            <h3>Intentos de manipulación detectados:</h3>
+            <p id="manipulationCount"></p>
+            <h3>Reintentos:</h3>
+            <p id="attemptCount"></p>
+        </div>
+    </div>
 
-        const questions = [
-            // Indicador 3.1
+    <div id="timer">30:00</div>
+
+    <script>
+        const quizData = [
             {
-                id: 'q1',
-                indicator: 'Indicador 3.1: Indaga, analiza y explica con iniciativa e interés el origen y definición de la electrostática.',
-                question: "¿Qué fenómeno describe mejor la electrostática?",
-                options: [
-                    { value: 'a', text: "El flujo de corriente en un conductor." },
-                    { value: 'b', text: "La acumulación de cargas eléctricas en una superficie." },
-                    { value: 'c', text: "La creación de un campo magnético alrededor de un conductor." },
-                    { value: 'd', text: "La generación de electricidad mediante un generador." }
-                ]
-            },
-            {
-                id: 'q2',
-                indicator: 'Indicador 3.1: Indaga, analiza y explica con iniciativa e interés el origen y definición de la electrostática.',
-                question: "¿Cómo se denomina la carga eléctrica que no está en movimiento?",
-                options: [
-                    { value: 'a', text: "Corriente eléctrica" },
-                    { value: 'b', text: "Electrostática" },
-                    { value: 'c', text: "Electrólisis" },
-                    { value: 'd', text: "Magnetismo" }
-                ]
-            },
-            {
-                id: 'q3',
-                indicator: 'Indicador 3.1: Indaga, analiza y explica con iniciativa e interés el origen y definición de la electrostática.',
-                question: "¿Cuál de los siguientes fenómenos es un ejemplo de electrostática?",
-                options: [
-                    { value: 'a', text: "La atracción de una hoja de papel por un peine frotado." },
-                    { value: 'b', text: "El encendido de una bombilla." },
-                    { value: 'c', text: "El calentamiento de una resistencia." },
-                    { value: 'd', text: "El paso de corriente por un cable." }
-                ]
-            },
-            {
-                id: 'q4',
-                indicator: 'Indicador 3.1: Indaga, analiza y explica con iniciativa e interés el origen y definición de la electrostática.',
-                question: "¿Qué tipo de carga se acumula en un cuerpo debido a la fricción?",
-                options: [
-                    { value: 'a', text: "Carga positiva" },
-                    { value: 'b', text: "Carga negativa" },
-                    { value: 'c', text: "Ambas, dependiendo del material" },
-                    { value: 'd', text: "Carga neutra" }
-                ]
-            },
-            {
-                id: 'q5',
-                indicator: 'Indicador 3.1: Indaga, analiza y explica con iniciativa e interés el origen y definición de la electrostática.',
-                question: "¿Cuál es el principio fundamental de la electrostática?",
-                options: [
-                    { value: 'a', text: "Las cargas opuestas se atraen y las similares se repelen." },
-                    { value: 'b', text: "Las cargas se mueven de un punto a otro creando corriente." },
-                    { value: 'c', text: "La corriente eléctrica genera un campo magnético." },
-                    { value: 'd', text: "La energía se conserva en un circuito cerrado." }
-                ]
-            },
-            // Indicador 3.2
-            {
-                id: 'q6',
-                indicator: 'Indicador 3.2: Analiza, interpreta y explica con interés el origen y la ley de las cargas eléctricas.',
-                question: "¿Qué establece la ley de las cargas eléctricas?",
-                options: [
-                    { value: 'a', text: "Las cargas similares se atraen y las opuestas se repelen." },
-                    { value: 'b', text: "Las cargas opuestas se atraen y las similares se repelen." },
-                    { value: 'c', text: "Todas las cargas se atraen entre sí." },
-                    { value: 'd', text: "Las cargas no interactúan entre sí." }
-                ]
-            },
-            {
-                id: 'q7',
-                indicator: 'Indicador 3.2: Analiza, interpreta y explica con interés el origen y la ley de las cargas eléctricas.',
-                question: "¿Cuál es la unidad de medida de la carga eléctrica?",
-                options: [
-                    { value: 'a', text: "Newton" },
-                    { value: 'b', text: "Coulomb" },
-                    { value: 'c', text: "Voltio" },
-                    { value: 'd', text: "Amperio" }
-                ]
-            },
-            {
-                id: 'q8',
-                indicator: 'Indicador 3.2: Analiza, interpreta y explica con interés el origen y la ley de las cargas eléctricas.',
-                question: "¿Qué tipo de carga eléctrica tiene un electrón?",
-                options: [
-                    { value: 'a', text: "Positiva" },
-                    { value: 'b', text: "Negativa" },
-                    { value: 'c', text: "Neutra" },
-                    { value: 'd', text: "Depende del contexto" }
-                ]
-            },
-            {
-                id: 'q9',
-                indicator: 'Indicador 3.2: Analiza, interpreta y explica con interés el origen y la ley de las cargas eléctricas.',
-                question: "¿Qué sucede cuando dos objetos con cargas similares se acercan?",
-                options: [
-                    { value: 'a', text: "Se atraen" },
-                    { value: 'b', text: "Se repelen" },
-                    { value: 'c', text: "No interactúan" },
-                    { value: 'd', text: "Depende de los materiales" }
-                ]
-            },
-            {
-                id: 'q10',
-                indicator: 'Indicador 3.2: Analiza, interpreta y explica con interés el origen y la ley de las cargas eléctricas.',
-                question: "¿Cuál es la relación entre la distancia y la fuerza de atracción o repulsión entre dos cargas?",
-                options: [
-                    { value: 'a', text: "Directamente proporcional a la distancia" },
-                    { value: 'b', text: "Inversamente proporcional al cuadrado de la distancia" },
-                    { value: 'c', text: "No depende de la distancia" },
-                    { value: 'd', text: "Inversamente proporcional a la distancia" }
-                ]
-            },
-            // Indicador 3.3
-            {
-                id: 'q11',
-                indicator: 'Indicador 3.3: Resuelve con seguridad y persistencia problemas de cálculo sobre fuerzas y campos eléctricos, aplicando la ley de Coulomb.',
-                question: "Según la ley de Coulomb, ¿qué sucede con la fuerza entre dos cargas si la distancia entre ellas se reduce a la mitad?",
-                options: [
-                    { value: 'a', text: "La fuerza se cuadruplica" },
-                    { value: 'b', text: "La fuerza se duplica" },
-                    { value: 'c', text: "La fuerza se reduce a la mitad" },
-                    { value: 'd', text: "La fuerza no cambia" }
-                ]
-            },
-            {
-                id: 'q12',
-                indicator: 'Indicador 3.3: Resuelve con seguridad y persistencia problemas de cálculo sobre fuerzas y campos eléctricos, aplicando la ley de Coulomb.',
-                question: "Dos cargas de 2 C y 4 C están separadas por 2 metros. ¿Cuál es la fuerza entre ellas si la constante de Coulomb es 9x10^9 Nm²/C²?",
-                options: [
-                    { value: 'a', text: "18x10^9 N" },
-                    { value: 'b', text: "36x10^9 N" },
-                    { value: 'c', text: "72x10^9 N" },
-                    { value: 'd', text: "9x10^9 N" }
-                ]
-            },
-            {
-                id: 'q13',
-                indicator: 'Indicador 3.3: Resuelve con seguridad y persistencia problemas de cálculo sobre fuerzas y campos eléctricos, aplicando la ley de Coulomb.',
-                question: "¿Qué sucede con la fuerza si la carga de uno de los cuerpos se triplica, manteniendo todo lo demás constante?",
-                options: [
-                    { value: 'a', text: "La fuerza se triplica" },
-                    { value: 'b', text: "La fuerza se duplica" },
-                    { value: 'c', text: "La fuerza se reduce a la mitad" },
-                    { value: 'd', text: "La fuerza no cambia" }
-                ]
-            },
-            {
-                id: 'q14',
-                indicator: 'Indicador 3.3: Resuelve con seguridad y persistencia problemas de cálculo sobre fuerzas y campos eléctricos, aplicando la ley de Coulomb.',
-                question: "Si dos cargas se repelen con una fuerza de 8 N a 3 metros de distancia, ¿qué fuerza ejercerán a 6 metros de distancia?",
-                options: [
-                    { value: 'a', text: "2 N" },
-                    { value: 'b', text: "4 N" },
-                    { value: 'c', text: "16 N" },
-                    { value: 'd', text: "8 N" }
-                ]
-            },
-            {
-                id: 'q15',
-                indicator: 'Indicador 3.3: Resuelve con seguridad y persistencia problemas de cálculo sobre fuerzas y campos eléctricos, aplicando la ley de Coulomb.',
-                question: "Un campo eléctrico se define como:",
-                options: [
-                    { value: 'a', text: "Una región donde una carga eléctrica experimenta una fuerza." },
-                    { value: 'b', text: "La fuerza que actúa entre dos imanes." },
-                    { value: 'c', text: "La energía almacenada en un circuito." },
-                    { value: 'd', text: "La corriente que fluye a través de un conductor." }
-                ]
-            },
-            // Indicador 3.4
-            {
-                id: 'q16',
-                indicator: 'Indicador 3.4: Indaga y describe con interés el trabajo realizado por una fuerza al mover una carga de prueba dentro de un campo eléctrico.',
-                question: "¿Cómo se calcula el trabajo realizado al mover una carga dentro de un campo eléctrico?",
-                options: [
-                    { value: 'a', text: "Trabajo = Fuerza × Distancia" },
-                    { value: 'b', text: "Trabajo = Carga × Potencial Eléctrico" },
-                    { value: 'c', text: "Trabajo = Campo Eléctrico × Distancia" },
-                    { value: 'd', text: "Trabajo = Carga × Distancia" }
-                ]
-            },
-            {
-                id: 'q17',
-                indicator: 'Indicador 3.4: Indaga y describe con interés el trabajo realizado por una fuerza al mover una carga de prueba dentro de un campo eléctrico.',
-                question: "Una carga de 3 C se mueve a través de un potencial eléctrico de 5 V. ¿Cuál es el trabajo realizado?",
-                options: [
-                    { value: 'a', text: "15 J" },
-                    { value: 'b', text: "10 J" },
-                    { value: 'c', text: "5 J" },
-                    { value: 'd', text: "20 J" }
-                ]
-            },
-            {
-                id: 'q18',
-                indicator: 'Indicador 3.4: Indaga y describe con interés el trabajo realizado por una fuerza al mover una carga de prueba dentro de un campo eléctrico.',
-                question: "¿Qué sucede con el trabajo si se duplica la carga, manteniendo constante el potencial eléctrico?",
-                options: [
-                    { value: 'a', text: "El trabajo se duplica" },
-                    { value: 'b', text: "El trabajo se reduce a la mitad" },
-                    { value: 'c', text: "El trabajo no cambia" },
-                    { value: 'd', text: "El trabajo se cuadruplica" }
-                ]
-            },
-            {
-                id: 'q19',
-                indicator: 'Indicador 3.4: Indaga y describe con interés el trabajo realizado por una fuerza al mover una carga de prueba dentro de un campo eléctrico.',
-                question: "El trabajo realizado por una fuerza en un campo eléctrico es positivo cuando:",
-                options: [
-                    { value: 'a', text: "La carga se mueve en contra del campo eléctrico." },
-                    { value: 'b', text: "La carga se mueve a favor del campo eléctrico." },
-                    { value: 'c', text: "No hay movimiento de la carga." },
-                    { value: 'd', text: "La fuerza es perpendicular al movimiento." }
-                ]
-            },
-            {
-                id: 'q20',
-                indicator: 'Indicador 3.4: Indaga y describe con interés el trabajo realizado por una fuerza al mover una carga de prueba dentro de un campo eléctrico.',
-                question: "¿Cuál es la unidad de medida del trabajo en un campo eléctrico?",
-                options: [
-                    { value: 'a', text: "Newton" },
-                    { value: 'b', text: "Joule" },
-                    { value: 'c', text: "Coulomb" },
-                    { value: 'd', text: "Voltio" }
-                ]
-            },
-            // Indicador 3.5
-            {
-                id: 'q21',
-                indicator: 'Indicador 3.5: Resuelve problemas para calcular con seguridad la energía a partir de la diferencia de potencial eléctrico.',
-                question: "Si se mueve una carga de 2 C a través de una diferencia de potencial de 6 V, ¿cuánta energía se libera?",
-                options: [
-                    { value: 'a', text: "3 J" },
-                    { value: 'b', text: "12 J" },
-                    { value: 'c', text: "6 J" },
-                    { value: 'd', text: "18 J" }
-                ]
-            },
-            {
-                id: 'q22',
-                indicator: 'Indicador 3.5: Resuelve problemas para calcular con seguridad la energía a partir de la diferencia de potencial eléctrico.',
-                question: "¿Qué sucede con la energía liberada si se duplica la carga en un campo eléctrico constante?",
-                options: [
-                    { value: 'a', text: "La energía se duplica" },
-                    { value: 'b', text: "La energía se reduce a la mitad" },
-                    { value: 'c', text: "La energía no cambia" },
-                    { value: 'd', text: "La energía se cuadruplica" }
-                ]
-            },
-            {
-                id: 'q23',
-                indicator: 'Indicador 3.5: Resuelve problemas para calcular con seguridad la energía a partir de la diferencia de potencial eléctrico.',
-                question: "La energía potencial eléctrica depende de:",
-                options: [
-                    { value: 'a', text: "La carga y el potencial eléctrico" },
-                    { value: 'b', text: "El campo eléctrico y la distancia" },
-                    { value: 'c', text: "El tiempo y la corriente" },
-                    { value: 'd', text: "La resistencia y la corriente" }
-                ]
-            },
-            {
-                id: 'q24',
-                indicator: 'Indicador 3.5: Resuelve problemas para calcular con seguridad la energía a partir de la diferencia de potencial eléctrico.',
-                question: "Si se reduce a la mitad la diferencia de potencial, ¿qué ocurre con la energía liberada?",
-                options: [
-                    { value: 'a', text: "La energía se reduce a la mitad" },
-                    { value: 'b', text: "La energía se duplica" },
-                    { value: 'c', text: "La energía no cambia" },
-                    { value: 'd', text: "La energía se cuadruplica" }
-                ]
-            },
-            {
-                id: 'q25',
-                indicator: 'Indicador 3.5: Resuelve problemas para calcular con seguridad la energía a partir de la diferencia de potencial eléctrico.',
-                question: "¿Qué unidad se utiliza para medir la energía en un circuito eléctrico?",
-                options: [
-                    { value: 'a', text: "Voltio" },
-                    { value: 'b', text: "Joule" },
-                    { value: 'c', text: "Watt" },
-                    { value: 'd', text: "Coulomb" }
-                ]
-            },
-            // Indicador 3.6
-            {
-                id: 'q26',
-                indicator: 'Indicador 3.6: Representa y describe correctamente la corriente eléctrica e identifica con interés el Amperio como unidad de medida.',
-                question: "¿Qué es la corriente eléctrica?",
-                options: [
-                    { value: 'a', text: "El movimiento de electrones en un conductor." },
-                    { value: 'b', text: "La acumulación de carga en una superficie." },
-                    { value: 'c', text: "La resistencia al flujo de carga." },
-                    { value: 'd', text: "La energía almacenada en un campo magnético." }
-                ]
-            },
-            {
-                id: 'q27',
-                indicator: 'Indicador 3.6: Representa y describe correctamente la corriente eléctrica e identifica con interés el Amperio como unidad de medida.',
-                question: "¿Qué unidad se utiliza para medir la corriente eléctrica?",
-                options: [
-                    { value: 'a', text: "Voltio" },
-                    { value: 'b', text: "Amperio" },
-                    { value: 'c', text: "Coulomb" },
-                    { value: 'd', text: "Watt" }
-                ]
-            },
-            {
-                id: 'q28',
-                indicator: 'Indicador 3.6: Representa y describe correctamente la corriente eléctrica e identifica con interés el Amperio como unidad de medida.',
-                question: "Si un circuito tiene una corriente de 3 A, ¿cuántos Coulombs pasan por un punto en 2 segundos?",
-                options: [
-                    { value: 'a', text: "6 C" },
-                    { value: 'b', text: "3 C" },
-                    { value: 'c', text: "9 C" },
-                    { value: 'd', text: "1.5 C" }
-                ]
-            },
-            {
-                id: 'q29',
-                indicator: 'Indicador 3.6: Representa y describe correctamente la corriente eléctrica e identifica con interés el Amperio como unidad de medida.',
-                question: "¿Cómo se define un Amperio?",
-                options: [
-                    { value: 'a', text: "La cantidad de carga que pasa por un punto en un segundo." },
-                    { value: 'b', text: "La resistencia de un conductor a la corriente." },
-                    { value: 'c', text: "La energía potencial en un circuito." },
-                    { value: 'd', text: "La cantidad de energía disipada en un circuito." }
-                ]
-            },
-            {
-                id: 'q30',
-                indicator: 'Indicador 3.6: Representa y describe correctamente la corriente eléctrica e identifica con interés el Amperio como unidad de medida.',
-                question: "¿Qué relación existe entre la corriente y el voltaje en un circuito eléctrico?",
-                options: [
-                    { value: 'a', text: "Directamente proporcional" },
-                    { value: 'b', text: "Inversamente proporcional" },
-                    { value: 'c', text: "No están relacionados" },
-                    { value: 'd', text: "Depende de la resistencia" }
-                ]
-            },
-            // Indicador 3.7
-            {
-                id: 'q31',
-                indicator: 'Indicador 3.7: Experimenta, explica y diferencia con seguridad la diferencia entre resistividad y resistencia de algunos materiales del entorno.',
-                question: "¿Qué es la resistividad?",
-                options: [
-                    { value: 'a', text: "La capacidad de un material para resistir el flujo de corriente." },
-                    { value: 'b', text: "La resistencia de un conductor a la corriente." },
-                    { value: 'c', text: "La cantidad de carga que pasa por un punto en un segundo." },
-                    { value: 'd', text: "La cantidad de energía disipada en un circuito." }
-                ]
-            },
-            {
-                id: 'q32',
-                indicator: 'Indicador 3.7: Experimenta, explica y diferencia con seguridad la diferencia entre resistividad y resistencia de algunos materiales del entorno.',
-                question: "¿Qué unidad se utiliza para medir la resistividad?",
-                options: [
-                    { value: 'a', text: "Ohmio" },
-                    { value: 'b', text: "Ohmio-metro" },
-                    { value: 'c', text: "Amperio" },
-                    { value: 'd', text: "Voltio" }
-                ]
-            },
-            {
-                id: 'q33',
-                indicator: 'Indicador 3.7: Experimenta, explica y diferencia con seguridad la diferencia entre resistividad y resistencia de algunos materiales del entorno.',
-                question: "¿Qué relación existe entre la resistividad y la resistencia?",
-                options: [
-                    { value: 'a', text: "Directamente proporcional" },
-                    { value: 'b', text: "Inversamente proporcional" },
-                    { value: 'c', text: "No están relacionadas" },
-                    { value: 'd', text: "Depende de la corriente" }
-                ]
-            },
-            {
-                id: 'q34',
-                indicator: 'Indicador 3.7: Experimenta, explica y diferencia con seguridad la diferencia entre resistividad y resistencia de algunos materiales del entorno.',
-                question: "¿Qué sucede con la resistencia de un conductor si se aumenta su longitud?",
-                options: [
-                    { value: 'a', text: "Aumenta" },
-                    { value: 'b', text: "Disminuye" },
-                    { value: 'c', text: "Permanece constante" },
-                    { value: 'd', text: "Depende de la temperatura" }
-                ]
-            },
-            {
-                id: 'q35',
-                indicator: 'Indicador 3.7: Experimenta, explica y diferencia con seguridad la diferencia entre resistividad y resistencia de algunos materiales del entorno.',
                 question: "¿Cómo afecta la temperatura a la resistividad de un conductor?",
-                options: [
-                    { value: 'a', text: "La resistividad aumenta con la temperatura" },
-                    { value: 'b', text: "La resistividad disminuye con la temperatura" },
-                    { value: 'c', text: "La resistividad no cambia con la temperatura" },
-                    { value: 'd', text: "Depende del material" }
-                ]
-            },
-            // Indicador 3.8
-            {
-                id: 'q36',
-                indicator: 'Indicador 3.8: Experimenta y clasifica con interés algunos materiales del entorno en conductores, semiconductores y aislantes de electricidad.',
-                question: "¿Qué material es un buen conductor de electricidad?",
-                options: [
-                    { value: 'a', text: "Cobre" },
-                    { value: 'b', text: "Madera" },
-                    { value: 'c', text: "Vidrio" },
-                    { value: 'd', text: "Plástico" }
+                answers: [
+                    { text: "La resistividad aumenta con la temperatura", correct: true },
+                    { text: "La resistividad disminuye con la temperatura", correct: false },
+                    { text: "La resistividad no cambia con la temperatura", correct: false },
+                    { text: "Depende del material", correct: false }
                 ]
             },
             {
-                id: 'q37',
-                indicator: 'Indicador 3.8: Experimenta y clasifica con interés algunos materiales del entorno en conductores, semiconductores y aislantes de electricidad.',
-                question: "¿Cuál de los siguientes materiales es un semiconductor?",
-                options: [
-                    { value: 'a', text: "Silicio" },
-                    { value: 'b', text: "Cobre" },
-                    { value: 'c', text: "Plástico" },
-                    { value: 'd', text: "Hierro" }
+                question: "¿Qué relación existe entre la resistividad y la resistencia?",
+                answers: [
+                    { text: "Directamente proporcional", correct: true },
+                    { text: "Inversamente proporcional", correct: false },
+                    { text: "No están relacionadas", correct: false },
+                    { text: "Depende de la corriente", correct: false }
                 ]
             },
             {
-                id: 'q38',
-                indicator: 'Indicador 3.8: Experimenta y clasifica con interés algunos materiales del entorno en conductores, semiconductores y aislantes de electricidad.',
+                question: "Si un circuito tiene una corriente de 3 A, ¿cuántos Coulombs pasan por un punto en 2 segundos?",
+                answers: [
+                    { text: "6 C", correct: true },
+                    { text: "3 C", correct: false },
+                    { text: "9 C", correct: false },
+                    { text: "1.5 C", correct: false }
+                ]
+            },
+            {
                 question: "¿Qué material se clasifica como un aislante?",
-                options: [
-                    { value: 'a', text: "Vidrio" },
-                    { value: 'b', text: "Aluminio" },
-                    { value: 'c', text: "Cobre" },
-                    { value: 'd', text: "Hierro" }
+                answers: [
+                    { text: "Vidrio", correct: true },
+                    { text: "Aluminio", correct: false },
+                    { text: "Cobre", correct: false },
+                    { text: "Hierro", correct: false }
                 ]
             },
             {
-                id: 'q39',
-                indicator: 'Indicador 3.8: Experimenta y clasifica con interés algunos materiales del entorno en conductores, semiconductores y aislantes de electricidad.',
+                question: "¿Cómo se comporta el voltaje en un circuito en paralelo?",
+                answers: [
+                    { text: "Es el mismo en todos los componentes.", correct: true },
+                    { text: "Se divide entre los componentes.", correct: false },
+                    { text: "Varía según la resistencia de cada componente.", correct: false },
+                    { text: "Es mayor en el primer componente.", correct: false }
+                ]
+            },
+            {
                 question: "¿Qué característica define a un semiconductor?",
-                options: [
-                    { value: 'a', text: "Puede comportarse como conductor o aislante dependiendo de las condiciones." },
-                    { value: 'b', text: "Siempre conduce electricidad." },
-                    { value: 'c', text: "No conduce electricidad en ninguna condición." },
-                    { value: 'd', text: "Se utiliza solo en circuitos de alta potencia." }
+                answers: [
+                    { text: "Puede comportarse como conductor o aislante dependiendo de las condiciones.", correct: true },
+                    { text: "Siempre conduce electricidad.", correct: false },
+                    { text: "No conduce electricidad en ninguna condición.", correct: false },
+                    { text: "Se utiliza solo en circuitos de alta potencia.", correct: false }
                 ]
             },
             {
-                id: 'q40',
-                indicator: 'Indicador 3.8: Experimenta y clasifica con interés algunos materiales del entorno en conductores, semiconductores y aislantes de electricidad.',
-                question: "¿Cuál es una aplicación común de los semiconductores?",
-                options: [
-                    { value: 'a', text: "En la fabricación de transistores y diodos." },
-                    { value: 'b', text: "Como cables para transmitir electricidad." },
-                    { value: 'c', text: "En el recubrimiento de cables eléctricos." },
-                    { value: 'd', text: "En la construcción de estructuras metálicas." }
-                ]
-            },
-            // Indicador 3.9
-            {
-                id: 'q41',
-                indicator: 'Indicador 3.9: Explica con interés la diferencia entre conductividad y conductancia de algunos materiales del entorno.',
-                question: "¿Qué es la conductividad eléctrica?",
-                options: [
-                    { value: 'a', text: "La capacidad de un material para permitir el paso de corriente eléctrica." },
-                    { value: 'b', text: "La resistencia de un material al paso de corriente eléctrica." },
-                    { value: 'c', text: "La energía almacenada en un campo eléctrico." },
-                    { value: 'd', text: "La carga acumulada en una superficie." }
-                ]
-            },
-            {
-                id: 'q42',
-                indicator: 'Indicador 3.9: Explica con interés la diferencia entre conductividad y conductancia de algunos materiales del entorno.',
-                question: "¿Cuál es la unidad de medida de la conductividad?",
-                options: [
-                    { value: 'a', text: "Siemens por metro" },
-                    { value: 'b', text: "Ohmio" },
-                    { value: 'c', text: "Amperio" },
-                    { value: 'd', text: "Voltio" }
-                ]
-            },
-            {
-                id: 'q43',
-                indicator: 'Indicador 3.9: Explica con interés la diferencia entre conductividad y conductancia de algunos materiales del entorno.',
-                question: "¿Qué es la conductancia eléctrica?",
-                options: [
-                    { value: 'a', text: "La inversa de la resistencia eléctrica." },
-                    { value: 'b', text: "La resistencia al paso de corriente en un material." },
-                    { value: 'c', text: "La capacidad de un material para almacenar carga." },
-                    { value: 'd', text: "La energía disipada en un circuito." }
-                ]
-            },
-            {
-                id: 'q44',
-                indicator: 'Indicador 3.9: Explica con interés la diferencia entre conductividad y conductancia de algunos materiales del entorno.',
-                question: "¿Cuál es la unidad de medida de la conductancia?",
-                options: [
-                    { value: 'a', text: "Siemens" },
-                    { value: 'b', text: "Ohmio" },
-                    { value: 'c', text: "Amperio" },
-                    { value: 'd', text: "Voltio" }
-                ]
-            },
-            {
-                id: 'q45',
-                indicator: 'Indicador 3.9: Explica con interés la diferencia entre conductividad y conductancia de algunos materiales del entorno.',
-                question: "¿Cómo se relacionan la conductividad y la conductancia?",
-                options: [
-                    { value: 'a', text: "La conductividad es una propiedad material, mientras que la conductancia depende de las dimensiones del objeto." },
-                    { value: 'b', text: "La conductancia es una propiedad material, mientras que la conductividad depende de las dimensiones del objeto." },
-                    { value: 'c', text: "No están relacionadas." },
-                    { value: 'd', text: "Son términos sinónimos." }
-                ]
-            },
-            // Indicador 3.10
-            {
-                id: 'q46',
-                indicator: 'Indicador 3.10: Analiza y aplica con seguridad la Ley de Ohm en la solución de problemas de circuitos eléctricos.',
-                question: "¿Qué establece la Ley de Ohm?",
-                options: [
-                    { value: 'a', text: "La corriente es directamente proporcional al voltaje e inversamente proporcional a la resistencia." },
-                    { value: 'b', text: "La corriente es inversamente proporcional al voltaje y directamente proporcional a la resistencia." },
-                    { value: 'c', text: "La resistencia es inversamente proporcional al voltaje y la corriente." },
-                    { value: 'd', text: "La potencia es igual al producto de la corriente y el voltaje." }
-                ]
-            },
-            {
-                id: 'q47',
-                indicator: 'Indicador 3.10: Analiza y aplica con seguridad la Ley de Ohm en la solución de problemas de circuitos eléctricos.',
-                question: "Si un circuito tiene una resistencia de 10 ohmios y se aplica un voltaje de 5 V, ¿cuál es la corriente?",
-                options: [
-                    { value: 'a', text: "0.5 A" },
-                    { value: 'b', text: "2 A" },
-                    { value: 'c', text: "5 A" },
-                    { value: 'd', text: "10 A" }
-                ]
-            },
-            {
-                id: 'q48',
-                indicator: 'Indicador 3.10: Analiza y aplica con seguridad la Ley de Ohm en la solución de problemas de circuitos eléctricos.',
-                question: "¿Qué sucede con la corriente si se duplica la resistencia manteniendo constante el voltaje?",
-                options: [
-                    { value: 'a', text: "La corriente se reduce a la mitad" },
-                    { value: 'b', text: "La corriente se duplica" },
-                    { value: 'c', text: "La corriente no cambia" },
-                    { value: 'd', text: "La corriente se cuadruplica" }
-                ]
-            },
-            {
-                id: 'q49',
-                indicator: 'Indicador 3.10: Analiza y aplica con seguridad la Ley de Ohm en la solución de problemas de circuitos eléctricos.',
                 question: "¿Cómo se calcula la resistencia en un circuito si se conoce el voltaje y la corriente?",
-                options: [
-                    { value: 'a', text: "Resistencia = Voltaje / Corriente" },
-                    { value: 'b', text: "Resistencia = Corriente / Voltaje" },
-                    { value: 'c', text: "Resistencia = Voltaje × Corriente" },
-                    { value: 'd', text: "Resistencia = Voltaje + Corriente" }
+                answers: [
+                    { text: "Resistencia = Voltaje / Corriente", correct: true },
+                    { text: "Resistencia = Corriente / Voltaje", correct: false },
+                    { text: "Resistencia = Voltaje × Corriente", correct: false },
+                    { text: "Resistencia = Voltaje + Corriente", correct: false }
                 ]
             },
             {
-                id: 'q50',
-                indicator: 'Indicador 3.10: Analiza y aplica con seguridad la Ley de Ohm en la solución de problemas de circuitos eléctricos.',
-                question: "Un circuito tiene un voltaje de 12 V y una resistencia de 4 ohmios. ¿Cuál es la corriente?",
-                options: [
-                    { value: 'a', text: "3 A" },
-                    { value: 'b', text: "2 A" },
-                    { value: 'c', text: "1 A" },
-                    { value: 'd', text: "6 A" }
-                ]
-            },
-            // Indicador 3.11
-            {
-                id: 'q51',
-                indicator: 'Indicador 3.11: Analiza y construye creativamente circuitos eléctricos en serie o en paralelo, siguiendo esquemas e instrucciones verbales o escritas.',
-                question: "¿Qué caracteriza a un circuito en serie?",
-                options: [
-                    { value: 'a', text: "Las resistencias están conectadas una después de la otra." },
-                    { value: 'b', text: "Las resistencias están conectadas en ramas separadas." },
-                    { value: 'c', text: "La corriente es diferente en cada resistencia." },
-                    { value: 'd', text: "El voltaje es el mismo en todas las resistencias." }
+                question: "¿Qué sucede con la corriente si se duplica la resistencia manteniendo constante el voltaje?",
+                answers: [
+                    { text: "La corriente se reduce a la mitad", correct: true },
+                    { text: "La corriente se duplica", correct: false },
+                    { text: "La corriente no cambia", correct: false },
+                    { text: "La corriente se cuadruplica", correct: false }
                 ]
             },
             {
-                id: 'q52',
-                indicator: 'Indicador 3.11: Analiza y construye creativamente circuitos eléctricos en serie o en paralelo, siguiendo esquemas e instrucciones verbales o escritas.',
-                question: "¿Qué caracteriza a un circuito en paralelo?",
-                options: [
-                    { value: 'a', text: "Las resistencias están conectadas en ramas separadas." },
-                    { value: 'b', text: "Las resistencias están conectadas una después de la otra." },
-                    { value: 'c', text: "La corriente es la misma en cada resistencia." },
-                    { value: 'd', text: "El voltaje es diferente en cada resistencia." }
+                question: "La energía potencial eléctrica depende de:",
+                answers: [
+                    { text: "La carga y el potencial eléctrico", correct: true },
+                    { text: "El campo eléctrico y la distancia", correct: false },
+                    { text: "El tiempo y la corriente", correct: false },
+                    { text: "La resistencia y la corriente", correct: false }
                 ]
             },
             {
-                id: 'q53',
-                indicator: 'Indicador 3.11: Analiza y construye creativamente circuitos eléctricos en serie o en paralelo, siguiendo esquemas e instrucciones verbales o escritas.',
-                question: "¿Cómo se comporta la corriente en un circuito en serie?",
-                options: [
-                    { value: 'a', text: "Es la misma en todos los componentes." },
-                    { value: 'b', text: "Se divide entre los componentes." },
-                    { value: 'c', text: "Varía según la resistencia de cada componente." },
-                    { value: 'd', text: "Es mayor en el primer componente." }
+                question: "¿Qué sucede con la energía liberada si se duplica la carga en un campo eléctrico constante?",
+                answers: [
+                    { text: "La energía se duplica", correct: true },
+                    { text: "La energía se reduce a la mitad", correct: false },
+                    { text: "La energía no cambia", correct: false },
+                    { text: "La energía se cuadruplica", correct: false }
                 ]
             },
             {
-                id: 'q54',
-                indicator: 'Indicador 3.11: Analiza y construye creativamente circuitos eléctricos en serie o en paralelo, siguiendo esquemas e instrucciones verbales o escritas.',
-                question: "¿Cómo se comporta el voltaje en un circuito en paralelo?",
-                options: [
-                    { value: 'a', text: "Es el mismo en todos los componentes." },
-                    { value: 'b', text: "Se divide entre los componentes." },
-                    { value: 'c', text: "Varía según la resistencia de cada componente." },
-                    { value: 'd', text: "Es mayor en el primer componente." }
-                ]
-            },
-            {
-                id: 'q55',
-                indicator: 'Indicador 3.11: Analiza y construye creativamente circuitos eléctricos en serie o en paralelo, siguiendo esquemas e instrucciones verbales o escritas.',
-                question: "¿Qué sucede si una resistencia se desconecta en un circuito en serie?",
-                options: [
-                    { value: 'a', text: "Se interrumpe la corriente en todo el circuito." },
-                    { value: 'b', text: "La corriente sigue fluyendo en las demás resistencias." },
-                    { value: 'c', text: "El voltaje aumenta en las demás resistencias." },
-                    { value: 'd', text: "La resistencia total del circuito disminuye." }
-                ]
-            },
-            // Indicador 3.12
-            {
-                id: 'q56',
-                indicator: 'Indicador 3.12: Explica con interés la diferencia entre conductividad y conductancia de algunos materiales del entorno.',
-                question: "¿Qué es la conductividad eléctrica?",
-                options: [
-                    { value: 'a', text: "La capacidad de un material para permitir el paso de corriente eléctrica." },
-                    { value: 'b', text: "La resistencia de un material al paso de corriente eléctrica." },
-                    { value: 'c', text: "La energía almacenada en un campo eléctrico." },
-                    { value: 'd', text: "La carga acumulada en una superficie." }
-                ]
-            },
-            {
-                id: 'q57',
-                indicator: 'Indicador 3.12: Explica con interés la diferencia entre conductividad y conductancia de algunos materiales del entorno.',
-                question: "¿Cuál es la unidad de medida de la conductividad?",
-                options: [
-                    { value: 'a', text: "Siemens por metro" },
-                    { value: 'b', text: "Ohmio" },
-                    { value: 'c', text: "Amperio" },
-                    { value: 'd', text: "Voltio" }
-                ]
-            },
-            {
-                id: 'q58',
-                indicator: 'Indicador 3.12: Explica con interés la diferencia entre conductividad y conductancia de algunos materiales del entorno.',
-                question: "¿Qué es la conductancia eléctrica?",
-                options: [
-                    { value: 'a', text: "La inversa de la resistencia eléctrica." },
-                    { value: 'b', text: "La resistencia al paso de corriente en un material." },
-                    { value: 'c', text: "La capacidad de un material para almacenar carga." },
-                    { value: 'd', text: "La energía disipada en un circuito." }
-                ]
-            },
-            {
-                id: 'q59',
-                indicator: 'Indicador 3.12: Explica con interés la diferencia entre conductividad y conductancia de algunos materiales del entorno.',
                 question: "¿Cuál es la unidad de medida de la conductancia?",
-                options: [
-                    { value: 'a', text: "Siemens" },
-                    { value: 'b', text: "Ohmio" },
-                    { value: 'c', text: "Amperio" },
-                    { value: 'd', text: "Voltio" }
+                answers: [
+                    { text: "Siemens", correct: true },
+                    { text: "Ohmio", correct: false },
+                    { text: "Amperio", correct: false },
+                    { text: "Voltio", correct: false }
                 ]
             },
             {
-                id: 'q60',
-                indicator: 'Indicador 3.12: Explica con interés la diferencia entre conductividad y conductancia de algunos materiales del entorno.',
-                question: "¿Cómo se relacionan la conductividad y la conductancia?",
-                options: [
-                    { value: 'a', text: "La conductividad es una propiedad material, mientras que la conductancia depende de las dimensiones del objeto." },
-                    { value: 'b', text: "La conductancia es una propiedad material, mientras que la conductividad depende de las dimensiones del objeto." },
-                    { value: 'c', text: "No están relacionadas." },
-                    { value: 'd', text: "Son términos sinónimos." }
-                ]
-            },
-            // Indicador 3.13
-            {
-                id: 'q61',
-                indicator: 'Indicador 3.13: Analiza y construye creativamente circuitos eléctricos en serie o en paralelo, siguiendo esquemas e instrucciones verbales o escritas.',
-                question: "¿Qué caracteriza a un circuito en serie?",
-                options: [
-                    { value: 'a', text: "Las resistencias están conectadas una después de la otra." },
-                    { value: 'b', text: "Las resistencias están conectadas en ramas separadas." },
-                    { value: 'c', text: "La corriente es diferente en cada resistencia." },
-                    { value: 'd', text: "El voltaje es el mismo en todas las resistencias." }
+                question: "¿Qué es la conductancia eléctrica?",
+                answers: [
+                    { text: "La inversa de la resistencia eléctrica.", correct: true },
+                    { text: "La resistencia al paso de corriente en un material.", correct: false },
+                    { text: "La capacidad de un material para almacenar carga.", correct: false },
+                    { text: "La energía disipada en un circuito.", correct: false }
                 ]
             },
             {
-                id: 'q62',
-                indicator: 'Indicador 3.13: Analiza y construye creativamente circuitos eléctricos en serie o en paralelo, siguiendo esquemas e instrucciones verbales o escritas.',
-                question: "¿Qué caracteriza a un circuito en paralelo?",
-                options: [
-                    { value: 'a', text: "Las resistencias están conectadas en ramas separadas." },
-                    { value: 'b', text: "Las resistencias están conectadas una después de la otra." },
-                    { value: 'c', text: "La corriente es la misma en cada resistencia." },
-                    { value: 'd', text: "El voltaje es diferente en cada resistencia." }
+                question: "Si dos cargas se repelen con una fuerza de 8 N a 3 metros de distancia, ¿qué fuerza ejercerán a 6 metros de distancia?",
+                answers: [
+                    { text: "2 N", correct: true },
+                    { text: "4 N", correct: false },
+                    { text: "16 N", correct: false },
+                    { text: "8 N", correct: false }
                 ]
             },
             {
-                id: 'q63',
-                indicator: 'Indicador 3.13: Analiza y construye creativamente circuitos eléctricos en serie o en paralelo, siguiendo esquemas e instrucciones verbales o escritas.',
+                question: "Dos cargas de 2 C y 4 C están separadas por 2 metros. ¿Cuál es la fuerza entre ellas si la constante de Coulomb es 9x10^9 Nm²/C²?",
+                answers: [
+                    { text: "18x10^9 N", correct: false },
+                    { text: "36x10^9 N", correct: false },
+                    { text: "72x10^9 N", correct: true },
+                    { text: "9x10^9 N", correct: false }
+                ]
+            },
+            {
+                question: "¿Cómo se denomina la carga eléctrica que no está en movimiento?",
+                answers: [
+                    { text: "Corriente eléctrica", correct: false },
+                    { text: "Electrostática", correct: true },
+                    { text: "Electrólisis", correct: false },
+                    { text: "Magnetismo", correct: false }
+                ]
+            },
+            {
                 question: "¿Cómo se comporta la corriente en un circuito en serie?",
-                options: [
-                    { value: 'a', text: "Es la misma en todos los componentes." },
-                    { value: 'b', text: "Se divide entre los componentes." },
-                    { value: 'c', text: "Varía según la resistencia de cada componente." },
-                    { value: 'd', text: "Es mayor en el primer componente." }
+                answers: [
+                    { text: "Es la misma en todos los componentes.", correct: true },
+                    { text: "Se divide entre los componentes.", correct: false },
+                    { text: "Varía según la resistencia de cada componente.", correct: false },
+                    { text: "Es mayor en el primer componente.", correct: false }
                 ]
             },
             {
-                id: 'q64',
-                indicator: 'Indicador 3.13: Analiza y construye creativamente circuitos eléctricos en serie o en paralelo, siguiendo esquemas e instrucciones verbales o escritas.',
-                question: "¿Cómo se comporta el voltaje en un circuito en paralelo?",
-                options: [
-                    { value: 'a', text: "Es el mismo en todos los componentes." },
-                    { value: 'b', text: "Se divide entre los componentes." },
-                    { value: 'c', text: "Varía según la resistencia de cada componente." },
-                    { value: 'd', text: "Es mayor en el primer componente." }
+                question: "¿Qué establece la Ley de Ohm?",
+                answers: [
+                    { text: "La corriente es directamente proporcional al voltaje e inversamente proporcional a la resistencia.", correct: true },
+                    { text: "La corriente es inversamente proporcional al voltaje y directamente proporcional a la resistencia.", correct: false },
+                    { text: "La resistencia es inversamente proporcional al voltaje y la corriente.", correct: false },
+                    { text: "La potencia es igual al producto de la corriente y el voltaje.", correct: false }
                 ]
             },
             {
-                id: 'q65',
-                indicator: 'Indicador 3.13: Analiza y construye creativamente circuitos eléctricos en serie o en paralelo, siguiendo esquemas e instrucciones verbales o escritas.',
+                question: "Si un circuito tiene una resistencia de 10 ohmios y se aplica un voltaje de 5 V, ¿cuál es la corriente?",
+                answers: [
+                    { text: "0.5 A", correct: false },
+                    { text: "2 A", correct: false },
+                    { text: "5 A", correct: true },
+                    { text: "10 A", correct: false }
+                ]
+            },
+            {
+                question: "¿Cuál es el principio fundamental de la electrostática?",
+                answers: [
+                    { text: "Las cargas opuestas se atraen y las similares se repelen.", correct: true },
+                    { text: "Las cargas se mueven de un punto a otro creando corriente.", correct: false },
+                    { text: "La corriente eléctrica genera un campo magnético.", correct: false },
+                    { text: "La energía se conserva en un circuito cerrado.", correct: false }
+                ]
+            },
+            {
+                question: "¿Qué caracteriza a un circuito en serie?",
+                answers: [
+                    { text: "Las resistencias están conectadas una después de la otra.", correct: true },
+                    { text: "Las resistencias están conectadas en ramas separadas.", correct: false },
+                    { text: "La corriente es diferente en cada resistencia.", correct: false },
+                    { text: "El voltaje es el mismo en todas las resistencias.", correct: false }
+                ]
+            },
+            {
+                question: "¿Qué es la conductancia eléctrica?",
+                answers: [
+                    { text: "La inversa de la resistencia eléctrica.", correct: true },
+                    { text: "La resistencia al paso de corriente en un material.", correct: false },
+                    { text: "La capacidad de un material para almacenar carga.", correct: false },
+                    { text: "La energía disipada en un circuito.", correct: false }
+                ]
+            },
+            {
+                question: "Un campo eléctrico se define como:",
+                answers: [
+                    { text: "Una región donde una carga eléctrica experimenta una fuerza.", correct: true },
+                    { text: "La fuerza que actúa entre dos imanes.", correct: false },
+                    { text: "La energía almacenada en un circuito.", correct: false },
+                    { text: "La corriente que fluye a través de un conductor.", correct: false }
+                ]
+            },
+            {
+                question: "¿Cómo se calcula el trabajo realizado al mover una carga dentro de un campo eléctrico?",
+                answers: [
+                    { text: "Trabajo = Fuerza × Distancia", correct: false },
+                    { text: "Trabajo = Carga × Potencial Eléctrico", correct: true },
+                    { text: "Trabajo = Campo Eléctrico × Distancia", correct: false },
+                    { text: "Trabajo = Carga × Distancia", correct: false }
+                ]
+            },
+            {
+                question: "¿Cómo se define un Amperio?",
+                answers: [
+                    { text: "La cantidad de carga que pasa por un punto en un segundo.", correct: true },
+                    { text: "La resistencia de un conductor a la corriente.", correct: false },
+                    { text: "La energía potencial en un circuito.", correct: false },
+                    { text: "La cantidad de energía disipada en un circuito.", correct: false }
+                ]
+            },
+            {
+                question: "¿Cuál es la unidad de medida del trabajo en un campo eléctrico?",
+                answers: [
+                    { text: "Newton", correct: false },
+                    { text: "Joule", correct: true },
+                    { text: "Coulomb", correct: false },
+                    { text: "Voltio", correct: false }
+                ]
+            },
+            {
+                question: "¿Qué caracteriza a un circuito en paralelo?",
+                answers: [
+                    { text: "Las resistencias están conectadas en ramas separadas.", correct: true },
+                    { text: "Las resistencias están conectadas una después de la otra.", correct: false },
+                    { text: "La corriente es la misma en cada resistencia.", correct: false },
+                    { text: "El voltaje es diferente en cada resistencia.", correct: false }
+                ]
+            },
+            {
+                question: "¿Qué es la corriente eléctrica?",
+                answers: [
+                    { text: "El movimiento de electrones en un conductor.", correct: true },
+                    { text: "La acumulación de carga en una superficie.", correct: false },
+                    { text: "La resistencia al flujo de carga.", correct: false },
+                    { text: "La energía almacenada en un campo magnético.", correct: false }
+                ]
+            },
+            {
+                question: "El trabajo realizado por una fuerza en un campo eléctrico es positivo cuando:",
+                answers: [
+                    { text: "La carga se mueve en contra del campo eléctrico.", correct: false },
+                    { text: "La carga se mueve a favor del campo eléctrico.", correct: true },
+                    { text: "No hay movimiento de la carga.", correct: false },
+                    { text: "La fuerza es perpendicular al movimiento.", correct: false }
+                ]
+            },
+            {
+                question: "Si se reduce a la mitad la diferencia de potencial, ¿qué ocurre con la energía liberada?",
+                answers: [
+                    { text: "La energía se reduce a la mitad", correct: true },
+                    { text: "La energía se duplica", correct: false },
+                    { text: "La energía no cambia", correct: false },
+                    { text: "La energía se cuadruplica", correct: false }
+                ]
+            },
+            {
+                question: "¿Qué sucede con la resistencia de un conductor si se aumenta su longitud?",
+                answers: [
+                    { text: "Aumenta", correct: true },
+                    { text: "Disminuye", correct: false },
+                    { text: "Permanece constante", correct: false },
+                    { text: "Depende de la temperatura", correct: false }
+                ]
+            },
+            {
+                question: "¿Cuál es la relación entre la distancia y la fuerza de atracción o repulsión entre dos cargas?",
+                answers: [
+                    { text: "Directamente proporcional a la distancia", correct: false },
+                    { text: "Inversamente proporcional al cuadrado de la distancia", correct: true },
+                    { text: "No depende de la distancia", correct: false },
+                    { text: "Inversamente proporcional a la distancia", correct: false }
+                ]
+            },
+            {
+                question: "¿Qué unidad se utiliza para medir la energía en un circuito eléctrico?",
+                answers: [
+                    { text: "Voltio", correct: false },
+                    { text: "Joule", correct: true },
+                    { text: "Watt", correct: false },
+                    { text: "Coulomb", correct: false }
+                ]
+            },
+            {
+                question: "¿Qué sucede con el trabajo si se duplica la carga, manteniendo constante el potencial eléctrico?",
+                answers: [
+                    { text: "El trabajo se duplica", correct: true },
+                    { text: "El trabajo se reduce a la mitad", correct: false },
+                    { text: "El trabajo no cambia", correct: false },
+                    { text: "El trabajo se cuadruplica", correct: false }
+                ]
+            },
+            {
+                question: "Una carga de 3 C se mueve a través de un potencial eléctrico de 5 V. ¿Cuál es el trabajo realizado?",
+                answers: [
+                    { text: "15 J", correct: true },
+                    { text: "10 J", correct: false },
+                    { text: "5 J", correct: false },
+                    { text: "20 J", correct: false }
+                ]
+            },
+            {
+                question: "¿Qué caracteriza a un circuito en paralelo?",
+                answers: [
+                    { text: "Las resistencias están conectadas en ramas separadas.", correct: true },
+                    { text: "Las resistencias están conectadas una después de la otra.", correct: false },
+                    { text: "La corriente es la misma en cada resistencia.", correct: false },
+                    { text: "El voltaje es diferente en cada resistencia.", correct: false }
+                ]
+            },
+            {
+                question: "¿Cómo se relacionan la conductividad y la conductancia?",
+                answers: [
+                    { text: "La conductividad es una propiedad material, mientras que la conductancia depende de las dimensiones del objeto.", correct: true },
+                    { text: "La conductancia es una propiedad material, mientras que la conductividad depende de las dimensiones del objeto.", correct: false },
+                    { text: "No están relacionadas.", correct: false },
+                    { text: "Son términos sinónimos.", correct: false }
+                ]
+            },
+            {
+                question: "¿Qué fenómeno describe mejor la electrostática?",
+                answers: [
+                    { text: "El flujo de corriente en un conductor.", correct: false },
+                    { text: "La acumulación de cargas eléctricas en una superficie.", correct: true },
+                    { text: "La creación de un campo magnético alrededor de un conductor.", correct: false },
+                    { text: "La generación de electricidad mediante un generador.", correct: false }
+                ]
+            },
+            {
+                question: "¿Qué tipo de carga se acumula en un cuerpo debido a la fricción?",
+                answers: [
+                    { text: "Carga positiva", correct: false },
+                    { text: "Carga negativa", correct: false },
+                    { text: "Ambas, dependiendo del material", correct: true },
+                    { text: "Carga neutra", correct: false }
+                ]
+            },
+            {
                 question: "¿Qué sucede si una resistencia se desconecta en un circuito en serie?",
-                options: [
-                    { value: 'a', text: "Se interrumpe la corriente en todo el circuito." },
-                    { value: 'b', text: "La corriente sigue fluyendo en las demás resistencias." },
-                    { value: 'c', text: "El voltaje aumenta en las demás resistencias." },
-                    { value: 'd', text: "La resistencia total del circuito disminuye." }
+                answers: [
+                    { text: "Se interrumpe la corriente en todo el circuito.", correct: true },
+                    { text: "La corriente sigue fluyendo en las demás resistencias.", correct: false },
+                    { text: "El voltaje aumenta en las demás resistencias.", correct: false },
+                    { text: "La resistencia total del circuito disminuye.", correct: false }
+                ]
+            },
+            {
+                question: "¿Cuál es la unidad de medida de la conductancia?",
+                answers: [
+                    { text: "Siemens", correct: true },
+                    { text: "Ohmio", correct: false },
+                    { text: "Amperio", correct: false },
+                    { text: "Voltio", correct: false }
+                ]
+            },
+            {
+                question: "¿Cuál es una aplicación común de los semiconductores?",
+                answers: [
+                    { text: "En la fabricación de transistores y diodos.", correct: true },
+                    { text: "Como cables para transmitir electricidad.", correct: false },
+                    { text: "En el recubrimiento de cables eléctricos.", correct: false },
+                    { text: "En la construcción de estructuras metálicas.", correct: false }
+                ]
+            },
+            {
+                question: "Según la ley de Coulomb, ¿qué sucede con la fuerza entre dos cargas si la distancia entre ellas se reduce a la mitad?",
+                answers: [
+                    { text: "La fuerza se cuadruplica", correct: true },
+                    { text: "La fuerza se duplica", correct: false },
+                    { text: "La fuerza se reduce a la mitad", correct: false },
+                    { text: "La fuerza no cambia", correct: false }
+                ]
+            },
+            {
+                question: "¿Qué es la conductividad eléctrica?",
+                answers: [
+                    { text: "La capacidad de un material para permitir el paso de corriente eléctrica.", correct: true },
+                    { text: "La resistencia de un material al paso de corriente eléctrica.", correct: false },
+                    { text: "La energía almacenada en un campo eléctrico.", correct: false },
+                    { text: "La carga acumulada en una superficie.", correct: false }
+                ]
+            },
+            {
+                question: "¿Qué tipo de carga eléctrica tiene un electrón?",
+                answers: [
+                    { text: "Positiva", correct: false },
+                    { text: "Negativa", correct: true },
+                    { text: "Neutra", correct: false },
+                    { text: "Depende del contexto", correct: false }
+                ]
+            },
+            {
+                question: "¿Qué material es un buen conductor de electricidad?",
+                answers: [
+                    { text: "Cobre", correct: true },
+                    { text: "Madera", correct: false },
+                    { text: "Vidrio", correct: false },
+                    { text: "Plástico", correct: false }
+                ]
+            },
+            {
+                question: "¿Cómo se comporta la corriente en un circuito en serie?",
+                answers: [
+                    { text: "Es la misma en todos los componentes.", correct: true },
+                    { text: "Se divide entre los componentes.", correct: false },
+                    { text: "Varía según la resistencia de cada componente.", correct: false },
+                    { text: "Es mayor en el primer componente.", correct: false }
+                ]
+            },
+            {
+                question: "¿Cuál de los siguientes materiales es un semiconductor?",
+                answers: [
+                    { text: "Silicio", correct: true },
+                    { text: "Cobre", correct: false },
+                    { text: "Plástico", correct: false },
+                    { text: "Hierro", correct: false }
+                ]
+            },
+            {
+                question: "¿Qué unidad se utiliza para medir la corriente eléctrica?",
+                answers: [
+                    { text: "Voltio", correct: false },
+                    { text: "Amperio", correct: true },
+                    { text: "Coulomb", correct: false },
+                    { text: "Watt", correct: false }
+                ]
+            },
+            {
+                question: "¿Cómo se relacionan la conductividad y la conductancia?",
+                answers: [
+                    { text: "La conductividad es una propiedad material, mientras que la conductancia depende de las dimensiones del objeto.", correct: true },
+                    { text: "La conductancia es una propiedad material, mientras que la conductividad depende de las dimensiones del objeto.", correct: false },
+                    { text: "No están relacionadas.", correct: false },
+                    { text: "Son términos sinónimos.", correct: false }
+                ]
+            },
+            {
+                question: "¿Qué caracteriza a un circuito en serie?",
+                answers: [
+                    { text: "Las resistencias están conectadas una después de la otra.", correct: true },
+                    { text: "Las resistencias están conectadas en ramas separadas.", correct: false },
+                    { text: "La corriente es diferente en cada resistencia.", correct: false },
+                    { text: "El voltaje es el mismo en todas las resistencias.", correct: false }
+                ]
+            },
+            {
+                question: "Si se mueve una carga de 2 C a través de una diferencia de potencial de 6 V, ¿cuánta energía se libera?",
+                answers: [
+                    { text: "3 J", correct: false },
+                    { text: "12 J", correct: true },
+                    { text: "6 J", correct: false },
+                    { text: "18 J", correct: false }
+                ]
+            },
+            {
+                question: "¿Qué es la conductividad eléctrica?",
+                answers: [
+                    { text: "La capacidad de un material para permitir el paso de corriente eléctrica.", correct: true },
+                    { text: "La resistencia de un material al paso de corriente eléctrica.", correct: false },
+                    { text: "La energía almacenada en un campo eléctrico.", correct: false },
+                    { text: "La carga acumulada en una superficie.", correct: false }
+                ]
+            },
+            {
+                question: "¿Cuál es la unidad de medida de la conductividad?",
+                answers: [
+                    { text: "Siemens por metro", correct: true },
+                    { text: "Ohmio", correct: false },
+                    { text: "Amperio", correct: false },
+                    { text: "Voltio", correct: false }
+                ]
+            },
+            {
+                question: "¿Qué es la resistividad?",
+                answers: [
+                    { text: "La capacidad de un material para resistir el flujo de corriente.", correct: true },
+                    { text: "La resistencia de un conductor a la corriente.", correct: false },
+                    { text: "La cantidad de carga que pasa por un punto en un segundo.", correct: false },
+                    { text: "La cantidad de energía disipada en un circuito.", correct: false }
+                ]
+            },
+            {
+                question: "¿Qué establece la ley de las cargas eléctricas?",
+                answers: [
+                    { text: "Las cargas similares se atraen y las opuestas se repelen.", correct: false },
+                    { text: "Las cargas opuestas se atraen y las similares se repelen.", correct: true },
+                    { text: "Todas las cargas se atraen entre sí.", correct: false },
+                    { text: "Las cargas no interactúan entre sí.", correct: false }
+                ]
+            },
+            {
+                question: "¿Cuál de los siguientes fenómenos es un ejemplo de electrostática?",
+                answers: [
+                    { text: "La atracción de una hoja de papel por un peine frotado.", correct: true },
+                    { text: "El encendido de una bombilla.", correct: false },
+                    { text: "El calentamiento de una resistencia.", correct: false },
+                    { text: "El paso de corriente por un cable.", correct: false }
+                ]
+            },
+            {
+                question: "¿Cómo se comporta el voltaje en un circuito en paralelo?",
+                answers: [
+                    { text: "Es el mismo en todos los componentes.", correct: true },
+                    { text: "Se divide entre los componentes.", correct: false },
+                    { text: "Varía según la resistencia de cada componente.", correct: false },
+                    { text: "Es mayor en el primer componente.", correct: false }
+                ]
+            },
+            {
+                question: "Un circuito tiene un voltaje de 12 V y una resistencia de 4 ohmios. ¿Cuál es la corriente?",
+                answers: [
+                    { text: "3 A", correct: true },
+                    { text: "2 A", correct: false },
+                    { text: "1 A", correct: false },
+                    { text: "6 A", correct: false }
+                ]
+            },
+            {
+                question: "¿Cuál es la unidad de medida de la carga eléctrica?",
+                answers: [
+                    { text: "Newton", correct: false },
+                    { text: "Coulomb", correct: true },
+                    { text: "Voltio", correct: false },
+                    { text: "Amperio", correct: false }
+                ]
+            },
+            {
+                question: "¿Qué sucede si una resistencia se desconecta en un circuito en serie?",
+                answers: [
+                    { text: "Se interrumpe la corriente en todo el circuito.", correct: true },
+                    { text: "La corriente sigue fluyendo en las demás resistencias.", correct: false },
+                    { text: "El voltaje aumenta en las demás resistencias.", correct: false },
+                    { text: "La resistencia total del circuito disminuye.", correct: false }
+                ]
+            },
+            {
+                question: "¿Qué sucede cuando dos objetos con cargas similares se acercan?",
+                answers: [
+                    { text: "Se atraen", correct: false },
+                    { text: "Se repelen", correct: true },
+                    { text: "No interactúan", correct: false },
+                    { text: "Depende de los materiales", correct: false }
+                ]
+            },
+            {
+                question: "¿Qué unidad se utiliza para medir la resistividad?",
+                answers: [
+                    { text: "Ohmio", correct: false },
+                    { text: "Ohmio-metro", correct: true },
+                    { text: "Amperio", correct: false },
+                    { text: "Voltio", correct: false }
+                ]
+            },
+            {
+                question: "¿Qué relación existe entre la corriente y el voltaje en un circuito eléctrico?",
+                answers: [
+                    { text: "Directamente proporcional", correct: true },
+                    { text: "Inversamente proporcional", correct: false },
+                    { text: "No están relacionados", correct: false },
+                    { text: "Depende de la resistencia", correct: false }
+                ]
+            },
+            {
+                question: "¿Cuál es la unidad de medida de la conductividad?",
+                answers: [
+                    { text: "Siemens por metro", correct: true },
+                    { text: "Ohmio", correct: false },
+                    { text: "Amperio", correct: false },
+                    { text: "Voltio", correct: false }
+                ]
+            },
+            {
+                question: "¿Qué sucede con la fuerza si la carga de uno de los cuerpos se triplica, manteniendo todo lo demás constante?",
+                answers: [
+                    { text: "La fuerza se triplica", correct: true },
+                    { text: "La fuerza se duplica", correct: false },
+                    { text: "La fuerza se reduce a la mitad", correct: false },
+                    { text: "La fuerza no cambia", correct: false }
                 ]
             }
         ];
 
-        const correctAnswerKeys = { 
-            q1: 'b', q2: 'b', q3: 'a', q4: 'c', q5: 'a',
-            q6: 'b', q7: 'b', q8: 'b', q9: 'b', q10: 'b',
-            q11: 'a', q12: 'b', q13: 'a', q14: 'a', q15: 'a',
-            q16: 'b', q17: 'a', q18: 'a', q19: 'b', q20: 'b',
-            q21: 'b', q22: 'a', q23: 'a', q24: 'a', q25: 'b',
-            q26: 'a', q27: 'b', q28: 'a', q29: 'a', q30: 'a',
-            q31: 'a', q32: 'b', q33: 'a', q34: 'a', q35: 'a',
-            q36: 'a', q37: 'a', q38: 'a', q39: 'a', q40: 'a',
-            q41: 'a', q42: 'a', q43: 'a', q44: 'a', q45: 'a',
-            q46: 'a', q47: 'a', q48: 'a', q49: 'a', q50: 'a',
-            q51: 'a', q52: 'a', q53: 'a', q54: 'a', q55: 'a',
-            q56: 'a', q57: 'a', q58: 'a', q59: 'a', q60: 'a',
-            q61: 'a', q62: 'a', q63: 'a', q64: 'a', q65: 'a'
-        };
+        const authorizedNIEs = [
+            "4267837", "3850952", "3851018", "5032035", "19806181", "6297536", 
+            "2608724", "6262810", "4267838", "20162435", "3850923", "19806209", 
+            "4267828", "3850942"
+        ];
+
+        let attempt = 0;
+        const maxAttempts = 2;
+        const evaluationName = "Evaluación Unidad 3: Principios de Electricidad";
+        let timer;
+        let timeLeft = 1800; // 30 minutos en segundos
+        let startTime;
+        let manipulationCount = 0;
 
         function shuffle(array) {
             for (let i = array.length - 1; i > 0; i--) {
@@ -857,99 +794,190 @@
             return array;
         }
 
-        function displayQuestions() {
-            const container = document.getElementById('questions-container');
-            const shuffledQuestions = shuffle([...questions]);
+        function loadQuiz() {
+            const quizContainer = document.getElementById('quiz');
+            quizContainer.innerHTML = '';
+            
+            // Shuffle questions and answers
+            const shuffledQuizData = shuffle([...quizData]);
 
-            shuffledQuestions.forEach((q, index) => {
-                const questionElement = document.createElement('div');
-                questionElement.classList.add('question');
-                questionElement.innerHTML = `
-                    <h3>${q.indicator}</h3>
-                    <p>${index + 1}. ${q.question}</p>
-                    ${q.options.map(option => `
-                        <input type="radio" name="${q.id}" value="${option.value}" required> ${option.value}) ${option.text}<br>
-                    `).join('')}
-                `;
-                container.appendChild(questionElement);
+            shuffledQuizData.forEach((data, index) => {
+                const questionContainer = document.createElement('div');
+                questionContainer.className = 'question';
+
+                const questionTitle = document.createElement('h3');
+                questionTitle.innerText = `${index + 1}. ${data.question}`;
+                questionContainer.appendChild(questionTitle);
+
+                const optionsList = document.createElement('ul');
+                optionsList.className = 'options';
+
+                shuffle(data.answers).forEach(answer => {
+                    const option = document.createElement('li');
+                    const optionLabel = document.createElement('label');
+                    const optionInput = document.createElement('input');
+                    optionInput.type = 'radio';
+                    optionInput.name = `question${index}`;
+                    optionInput.value = answer.correct;
+                    optionLabel.appendChild(optionInput);
+                    optionLabel.appendChild(document.createTextNode(answer.text));
+                    option.appendChild(optionLabel);
+                    optionsList.appendChild(option);
+                });
+
+                questionContainer.appendChild(optionsList);
+                quizContainer.appendChild(questionContainer);
             });
         }
 
-        function startTimer() {
-            document.getElementById('timer').classList.remove('hidden');
-            startTime = new Date();
-            const timerInterval = setInterval(() => {
-                const minutes = Math.floor(timeRemaining / 60);
-                const seconds = timeRemaining % 60;
-                timerElement.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
-                if (timeRemaining === 0) {
-                    clearInterval(timerInterval);
-                    showResults("Tiempo agotado. No se pudo completar la evaluación.", []);
-                }
-                timeRemaining--;
-            }, 1000);
-        }
-
-        document.getElementById('infoForm').addEventListener('submit', function (event) {
-            event.preventDefault();
-            const name = document.getElementById('name').value;
-            const nie = document.getElementById('nie').value;
-
-            if (!nieList.includes(nie)) {
-                alert("NIE no autorizado.");
+        function submitQuiz() {
+            const fullname = document.getElementById('fullname').value.trim();
+            const nie = document.getElementById('nie').value.trim();
+            
+            if (!fullname || !nie) {
+                alert('Por favor, ingresa tu nombre completo y NIE.');
                 return;
             }
 
-            document.getElementById('studentInfoForm').classList.add('hidden');
-            document.getElementById('quiz').classList.remove('hidden');
-            displayQuestions();
-            startTimer();
-        });
+            if (attempt >= maxAttempts) {
+                alert('Has alcanzado el número máximo de intentos.');
+                return;
+            }
 
-        document.getElementById('submitQuiz').addEventListener('click', function () {
-            let correctAnswers = 0;
+            const answers = document.querySelectorAll('input[type="radio"]:checked');
             let incorrectAnswers = [];
 
-            questions.forEach(q => {
-                const selectedAnswer = document.querySelector(`input[name="${q.id}"]:checked`);
-                if (selectedAnswer) {
-                    if (selectedAnswer.value === correctAnswerKeys[q.id]) {
-                        correctAnswers++;
-                    } else {
-                        incorrectAnswers.push(`Pregunta ${q.id.substring(1)} incorrecta.`);
-                    }
+            quizData.forEach((data, index) => {
+                const selected = answers[index] ? answers[index].value === 'true' : null;
+                if (selected === false || selected === null) {
+                    incorrectAnswers.push(index + 1);
                 }
             });
 
-            const score = (correctAnswers / questions.length) * 10;
+            // Mostrar los resultados en el modal
+            document.getElementById('modalName').innerText = `Nombre: ${fullname}`;
+            document.getElementById('modalNIE').innerText = `NIE: ${nie}`;
+            const modalIncorrectAnswers = document.getElementById('modalIncorrectAnswers');
+            modalIncorrectAnswers.innerHTML = '';
+            incorrectAnswers.forEach((questionNumber) => {
+                const div = document.createElement('div');
+                div.innerText = `Pregunta ${questionNumber}`;
+                modalIncorrectAnswers.appendChild(div);
+            });
+
+            // Mostrar detalles adicionales
             const endTime = new Date();
-            const timeTaken = Math.floor((endTime - startTime) / 1000); // Tiempo en segundos
+            const timeTaken = ((endTime - startTime) / 1000).toFixed(2);
+            const currentDate = new Date();
+            const modalDetails = document.getElementById('modalDetails');
+            modalDetails.innerHTML = `
+                Fecha: ${currentDate.toLocaleDateString()}<br>
+                Hora: ${currentDate.toLocaleTimeString()}<br>
+                Tiempo en realizar la prueba: ${timeTaken} segundos<br>
+                Nombre de la unidad: ${evaluationName}<br>
+                Calificación: ${((quizData.length - incorrectAnswers.length) / quizData.length * 10).toFixed(2)}/10
+            `;
 
-            showResults(`Calificación: ${score.toFixed(2)} / 10`, incorrectAnswers, timeTaken);
-        });
+            // Mostrar intentos de manipulación
+            document.getElementById('manipulationCount').innerText = `Intentos de manipulación detectados: ${manipulationCount}`;
 
-        function showResults(scoreText, incorrectAnswers, timeTaken) {
-            const date = new Date();
-            const minutesTaken = Math.floor(timeTaken / 60);
-            const secondsTaken = timeTaken % 60;
+            // Mostrar contador de reintentos
+            document.getElementById('attemptCount').innerText = `Reintentos: ${attempt + 1}`;
 
-            document.getElementById('quiz').classList.add('hidden');
-            document.getElementById('resultsModal').style.display = 'block';
-            document.getElementById('overlay').style.display = 'block';
+            const modal = document.getElementById('resultModal');
+            modal.style.display = 'block';
 
-            document.getElementById('date').textContent = `Fecha: ${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
-            document.getElementById('timeTaken').textContent = `Tiempo tomado: ${minutesTaken} minutos y ${secondsTaken} segundos`;
-            document.getElementById('unitEvaluated').textContent = `Unidad Evaluada: Unidad 3: Principios de Electricidad`;
-            document.getElementById('studentName').textContent = `Nombre del Estudiante: ${document.getElementById('name').value}`;
-            document.getElementById('studentNIE').textContent = `NIE: ${document.getElementById('nie').value}`;
-            document.getElementById('score').textContent = scoreText;
-            document.getElementById('incorrectAnswers').textContent = incorrectAnswers.join(', ');
+            attempt++;
+            if (attempt >= maxAttempts) {
+                alert('Has alcanzado el número máximo de intentos.');
+                // Aquí puedes agregar código para bloquear la MAC o deshabilitar la evaluación
+            }
         }
 
-        document.getElementById('closeModal').addEventListener('click', function () {
-            document.getElementById('resultsModal').style.display = 'none';
-            document.getElementById('overlay').style.display = 'none';
+        document.getElementById('submit').addEventListener('click', submitQuiz);
+
+        document.getElementById('startQuiz').addEventListener('click', function() {
+            const nie = document.getElementById('nie').value.trim();
+            if (!authorizedNIEs.includes(nie)) {
+                alert('NIE no autorizado.');
+                return;
+            }
+            document.querySelector('.quiz-container').style.display = 'block';
+            document.getElementById('infoModal').style.display = 'none';
+            startTime = new Date();
+            startTimer();
+            loadQuiz();
         });
+
+        // Modal close functionality
+        const closeModal = document.getElementsByClassName('close')[0];
+        closeModal.onclick = function() {
+            document.getElementById('resultModal').style.display = 'none';
+        }
+
+        window.onclick = function(event) {
+            if (event.target == document.getElementById('resultModal')) {
+                document.getElementById('resultModal').style.display = 'none';
+            }
+        }
+
+        document.addEventListener("contextmenu", function(e){
+            e.preventDefault();
+            updateCaptureCount();
+        }, false);
+
+        function startTimer() {
+            timer = setInterval(function() {
+                timeLeft--;
+                const timerElement = document.getElementById('timer');
+                let minutes = Math.floor(timeLeft / 60);
+                let seconds = timeLeft % 60;
+                seconds = seconds < 10 ? '0' + seconds : seconds;
+                timerElement.innerText = `${minutes}:${seconds}`;
+
+                if (timeLeft <= 600) {
+                    timerElement.style.backgroundColor = 'red';
+                } else if (timeLeft <= 1200) {
+                    timerElement.style.backgroundColor = 'orange';
+                } else {
+                    timerElement.style.backgroundColor = 'green';
+                }
+
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    submitQuiz();
+                }
+            }, 1000);
+        }
+
+        function updateCaptureCount() {
+            manipulationCount++;
+        }
+
+        document.addEventListener('visibilitychange', function() {
+            if (document.visibilityState === 'hidden') {
+                updateCaptureCount();
+            }
+        });
+
+        window.addEventListener('pagehide', function() {
+            updateCaptureCount();
+        });
+
+        window.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+            updateCaptureCount();
+        });
+
+        document.addEventListener('touchstart', function(event) {
+            if (event.touches.length > 1) {
+                updateCaptureCount();
+            }
+        });
+
+        window.onload = function() {
+            document.getElementById('infoModal').style.display = 'block';
+        }
     </script>
 </body>
 </html>
